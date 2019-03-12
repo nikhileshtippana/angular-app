@@ -25,8 +25,36 @@ export class HeroDetailComponent implements OnInit {
 
   getHero(): void {
     const id = +this.route.snapshot.paramMap.get('id');
-    this.heroService.getHero(id)
-      .subscribe(hero => this.hero = hero);
+
+    if (id > 0) {
+
+        this.heroService.getHero(id)
+          .subscribe(hero => this.hero = hero);
+
+    } else {
+        this.hero = new Hero;
+        this.hero.id = 0;
+    }
+  }
+
+  isAdd(): boolean {
+      return this.hero.id === 0;
+  }
+
+  save(): void {
+    if (this.isAdd()) {
+        this.heroService.addHero(this.hero)
+          .subscribe(hero => this.hero = hero);
+      this.goBack();
+    } else {
+        this.heroService.updateHero(this.hero)
+          .subscribe(hero => this.hero = hero);
+    }
+  }
+
+  delete(): void {
+      this.heroService.deleteHero(this.hero.id)
+          .subscribe(hero => this.goBack());
   }
 
   goBack(): void {

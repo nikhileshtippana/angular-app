@@ -23,7 +23,7 @@ export class HeroService {
     private http: HttpClient,
     private messageService: MessageService) { }
 
-  getHeroes (): Observable<Hero[]> {
+  getHeroes(): Observable<Hero[]> {
     return this.http.get<Hero[]>(this.heroesUrl, httpOptions)
       .pipe(
         tap(_ => this.log('fetched heroes')),
@@ -39,15 +39,40 @@ export class HeroService {
     );
   }
 
+  addHero(hero: Hero): Observable<Hero> {
+    return this.http.post<Hero>(this.heroesUrl, hero, httpOptions)
+      .pipe(
+        tap(_ => this.log('added hero ' + hero)),
+      catchError(this.handleError<Hero>('add hero: ' + hero.fullName()))
+      );
+  }
+
+  updateHero(hero: Hero): Observable<Hero> {
+    const url = `${this.heroesUrl}/${hero.id}`;
+    return this.http.put<Hero>(url, hero, httpOptions)
+      .pipe(
+        tap(_ => this.log('updated hero ' + hero)),
+      catchError(this.handleError<Hero>('update hero: ' + hero.fullName()))
+      );
+  }
+
+  deleteHero(id: number): Observable<Hero> {
+    const url = `${this.heroesUrl}/${id}`;
+    return this.http.delete<Hero>(url, httpOptions).pipe(
+      tap(_ => this.log(`deleted hero id=${id}`)),
+      catchError(this.handleError<Hero>(`delete hero id=${id}`))
+    );
+  }
+
   private handleError<T> (operation = 'operation', result?: T) {
-  return (error: any): Observable<T> => {
-    console.error(error);
+    return (error: any): Observable<T> => {
+        console.error(error);
 
-    this.log(`${operation} failed: ${error.message}`);
+        this.log(`${operation} failed: ${error.message}`);
 
-    return of(result as T);
-  };
-}
+        return of(result as T);
+    };
+  }
 
   private log(message: string) {
     this.messageService.add(`HeroService: ${message}`);
